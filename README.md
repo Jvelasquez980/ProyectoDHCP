@@ -33,5 +33,5 @@ https://drive.google.com/file/d/10MMi9E7SKKe77rlEuXFnlPFAZz9fJJ2Z/view?usp=shari
 Integrantes
 
 - Samuel Lenis
-- Jose Miguel Burgos
-- Jeronimo Velasquez
+- José Miguel Burgos
+- Jerónimo Velasquez

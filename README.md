@@ -1,9 +1,4 @@
 # ProyectoDHCP
-Integrantes
-
--Samuel Lenis
--Jose Miguel Burgos
--Jeronimo Velasquez
 
 Introducción
 
@@ -30,3 +25,9 @@ En conclusión, este proyecto no solo nos brindó la oportunidad de aplicar conc
 REFERENCIAS:
 
 https://www.scaler.com/topics/udp-server-client-implementation-in-c/
+
+Integrantes
+
+- Samuel Lenis
+- Jose Miguel Burgos
+- Jeronimo Velasquez

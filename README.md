@@ -1,7 +1,9 @@
 # ProyectoDHCP
 Integrantes
-####-Samuel Lenis
-, Jose Miguel Burgos, Jeronimo Velasquez
+
+-Samuel Lenis
+-Jose Miguel Burgos
+-Jeronimo Velasquez
 
 Introducción
 

@@ -1,6 +1,6 @@
 #ifndef DHCP_REQUEST_H
 #define DHCP_REQUEST_H
 
-int send_dhcp_request(char* ip_offer);
+int enviar_solicitud_dhcp(char* ip_ofrecida);
 
-#endif // DHCP_REQUEST_H
+#endif // SOLICITUD_NET_H

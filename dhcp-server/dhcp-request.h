@@ -1,6 +1,7 @@
 #ifndef DHCP_REQUEST_H
 #define DHCP_REQUEST_H
 
-void process_dhcp_request(int server_fd, struct dhcp_packet *packet, struct sockaddr *client_address);
+void gestionar_solicitud(int descriptor_servidor, struct paquete_red *paquete, struct sockaddr *direccion_cliente);
+
 
 #endif // DHCP_REQUEST_H

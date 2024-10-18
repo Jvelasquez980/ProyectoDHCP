@@ -1,56 +1,43 @@
 #include "./dhcp-commons.h"
 
-int send_dhcp_request(char* ip_offer) {
-  uint8_t mac_addr[6];
-  struct dhcp_packet packet, response;
-  memset(&packet, 0, sizeof(packet));
+int enviar_solicitud_dhcp(char* ip_ofrecida) {
+  uint8_t direccion_mac[6];
+  struct paquete_dhcp paquete, respuesta;
+  memset(&paquete, 0, sizeof(paquete));
 
-  // Obtener la dirección MAC
-  if (get_mac_address("enp0s3", mac_addr) < 0) {
+  if (obtener_mac("enp0s3", direccion_mac) < 0) {
     printf("Error al obtener la dirección MAC\n");
     return -1;
   }
 
-  // Preparar el paquete DHCPREQUEST
-  memset(&packet, 0, sizeof(packet));
-  packet.op = 1; // BOOTREQUEST
-  packet.htype = 1; // Ethernet
-  packet.hlen = 6; // Longitud de la dirección MAC
-  packet.xid = htonl(random()); // ID de transacción
-  packet.flags = htons(0x8000); // Set broadcast flag
-  memcpy(packet.chaddr, mac_addr, 6);
+  paquete.op = 1;
+  paquete.htype = 1;
+  paquete.hlen = 6;
+  paquete.xid = htonl(random());
+  paquete.flags = htons(0x8000);
+  memcpy(paquete.chaddr, direccion_mac, 6);
 
-  // Añadir opciones DHCP
-  uint8_t *option_ptr = packet.options;
+  uint8_t *puntero_opciones = paquete.opciones;
+  *puntero_opciones++ = 53;
+  *puntero_opciones++ = 1;
+  *puntero_opciones++ = 3;
+  *puntero_opciones++ = 61;
+  *puntero_opciones++ = 7;
+  *puntero_opciones++ = 1;
+  memcpy(puntero_opciones, direccion_mac, 6);
+  puntero_opciones += 6;
+  *puntero_opciones++ = 50;
+  *puntero_opciones++ = 4;
+  *(uint32_t*)puntero_opciones = inet_addr(ip_ofrecida);
+  puntero_opciones += 4;
+  *puntero_opciones++ = 255;
 
-  // Opción: DHCP Message Type (53)
-  *option_ptr++ = 53;
-  *option_ptr++ = 1;
-  *option_ptr++ = 3; // 3 = DHCPREQUEST
-
-  // Opción: Client Identifier (61)
-  *option_ptr++ = 61;
-  *option_ptr++ = 7; // longitud: tipo (1) + MAC (6)
-  *option_ptr++ = 1; // tipo de hardware: Ethernet
-  memcpy(option_ptr, mac_addr, 6); // MAC address (ejemplo)
-  option_ptr += 6;
-
-  // Opción: Requested IP Address (50)
-  printf("IP solicitada: %s\n", ip_offer);
-  *option_ptr++ = 50;
-  *option_ptr++ = 4;
-  *(uint32_t*)option_ptr = inet_addr(ip_offer); // IP solicitada
-  option_ptr += 4;
-
-  // Opción: End (255)
-  *option_ptr++ = 255;
-
-  int sock = socket_send_broadcast(&packet);
+  int sock = enviar_broadcast_socket(&paquete);
   printf("DHCPREQUEST enviado como broadcast\n");
-  // Recibir solicitud
-  int valread = socket_receive_broadcast(sock, &response);
+
+  int valread = recibir_broadcast_socket(sock, &respuesta);
   if (valread > 0) {
-    print_dhcp_response(&response);
+    imprimir_respuesta_dhcp(&respuesta);
   } else {
     printf("Error al recibir DHCPOFFER\n");
   }

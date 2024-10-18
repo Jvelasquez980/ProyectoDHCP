@@ -1,38 +1,38 @@
 #include "./dhcp-commons.h"
 #include "./dhcp-discover.h"
 
-void process_dhcp_discover(int server_fd, struct dhcp_packet *request, struct sockaddr *client_address) {
-  struct dhcp_packet reply;
-  printf("Procesando DHCPDISCOVER\n");
+void gestionar_descubrimiento(int descriptor_servidor, struct paquete_red *solicitud, struct sockaddr *direccion_cliente) {
+  struct paquete_red respuesta;
+  printf("Procesando descubrimiento de red\n");
 
-  // Crear DHCPOFFER
-  memset(&reply, 0, sizeof(struct dhcp_packet));
+  // Crear respuesta de oferta
+  memset(&respuesta, 0, sizeof(struct paquete_red));
 
-  reply.op = 2; // Boot Reply
-  reply.htype = 1; // Ethernet
-  reply.hlen = 6; // MAC address length
-  reply.xid = request->xid; // Debe coincidir con el xid de la solicitud
-  reply.yiaddr = inet_addr("192.168.1.100"); // IP ofrecida
-  reply.siaddr = inet_addr("192.168.1.1"); // IP del servidor
+  respuesta.op = 2; // Boot Reply
+  respuesta.htype = 1; // Ethernet
+  respuesta.hlen = 6; // Longitud de la MAC
+  respuesta.xid = solicitud->xid; // Debe coincidir con el xid de la solicitud
+  respuesta.yiaddr = inet_addr("192.168.1.100"); // IP ofrecida
+  respuesta.siaddr = inet_addr("192.168.1.1"); // IP del servidor
 
-  int offset = 0;
-  uint32_t subnet_mask = inet_addr("255.255.255.0");
-  uint32_t router = inet_addr("192.168.1.1");
-  uint32_t dns_server = inet_addr("8.8.8.8");
-  uint8_t lease_time[] = {0x00, 0x01, 0x51, 0x80}; // 86400 segundos (1 día)
-  char domain[] = "ejemplo.com";
-  
-  // Opciones DHCP
-  add_option(reply.options, &offset, 53, 1, "\x02"); // DHCPOFFER
-  add_option(reply.options, &offset, 1, 4, &subnet_mask); // Subnet Mask
-  add_option(reply.options, &offset, 3, 4, &router); // Router
-  add_option(reply.options, &offset, 6, 4, &dns_server); // DNS Server
-  add_option(reply.options, &offset, 51, 4, lease_time); // IP Address Lease Time
-  add_option(reply.options, &offset, 15, strlen(domain), domain); // Domain Name
-  add_option(reply.options, &offset, 255, 0, NULL); // End option
+  int desplazamiento = 0;
+  uint32_t mascara_red = inet_addr("255.255.255.0");
+  uint32_t enrutador = inet_addr("192.168.1.1");
+  uint32_t servidor_dns = inet_addr("8.8.8.8");
+  uint8_t tiempo_concesion[] = {0x00, 0x01, 0x51, 0x80}; // 86400 segundos (1 día)
+  char dominio[] = "ejemplo.com";
 
-  // Enviar DHCPOFFER
-  sendto(server_fd, &reply, sizeof(reply), 0, client_address, sizeof(*client_address));
-  
-  printf("DHCPOFFER enviado\n");
+  // Opciones de red
+  agregar_opcion(respuesta.opciones, &desplazamiento, 53, 1, "\x02"); // DHCPOFFER
+  agregar_opcion(respuesta.opciones, &desplazamiento, 1, 4, &mascara_red); // Máscara de subred
+  agregar_opcion(respuesta.opciones, &desplazamiento, 3, 4, &enrutador); // Enrutador
+  agregar_opcion(respuesta.opciones, &desplazamiento, 6, 4, &servidor_dns); // Servidor DNS
+  agregar_opcion(respuesta.opciones, &desplazamiento, 51, 4, tiempo_concesion); // Tiempo de concesión
+  agregar_opcion(respuesta.opciones, &desplazamiento, 15, strlen(dominio), dominio); // Nombre de dominio
+  agregar_opcion(respuesta.opciones, &desplazamiento, 255, 0, NULL); // Fin de opciones
+
+  // Enviar la respuesta de oferta
+  sendto(descriptor_servidor, &respuesta, sizeof(respuesta), 0, direccion_cliente, sizeof(*direccion_cliente));
+
+  printf("Oferta de red enviada\n");
 }

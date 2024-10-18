@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 
 // Estructura simplificada de un paquete DHCP
-struct dhcp_packet {
+struct paquete_red {
   uint8_t op;         // Tipo de mensaje (1 = request, 2 = reply)
   uint8_t htype;      // Tipo de hardware (1 = Ethernet)
   uint8_t hlen;       // Longitud de la dirección de hardware
@@ -25,9 +25,9 @@ struct dhcp_packet {
   uint8_t sname[64];  // Nombre del servidor
   uint8_t file[128];  // Nombre del archivo de boot
   uint32_t magic_cookie;
-  uint8_t options[64];// Opciones DHCP
+  uint8_t opciones[64];// Opciones DHCP
 };
 
-void add_option(uint8_t *options, int *offset, uint8_t code, uint8_t len, void *data);
+void agregar_opcion(uint8_t *opciones, int *desplazamiento, uint8_t codigo, uint8_t longitud, void *dato);
 
-#endif // DHCP_COMMONS_H
+#endif // NET_UTILS_H

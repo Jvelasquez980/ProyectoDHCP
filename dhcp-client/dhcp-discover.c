@@ -1,47 +1,43 @@
 #include "./dhcp-commons.h"
 
-int send_dhcp_discover(char *ip_offer) {
-  // Preparar el paquete DHCPDISCOVER
-  uint8_t mac_addr[6];
-  struct dhcp_packet packet, response;
-  memset(&packet, 0, sizeof(packet));
 
-  // Obtener la dirección MAC
-  if (get_mac_address("enp0s3", mac_addr) < 0) {
+int enviar_descubrimiento_dhcp(char *ip_ofrecida) {
+  uint8_t direccion_mac[6];
+  struct paquete_dhcp paquete, respuesta;
+  memset(&paquete, 0, sizeof(paquete));
+
+  if (obtener_mac("enp0s3", direccion_mac) < 0) {
     printf("Error al obtener la dirección MAC\n");
     return -1;
   }
 
-  packet.op = 1; // BOOTREQUEST
-  packet.htype = 1; // Ethernet
-  packet.hlen = 6; // Longitud de la dirección MAC
-  packet.xid = htonl(random()); // ID de transacción
-  packet.flags = htons(0x8000); // Set broadcast flag
-  memcpy(packet.chaddr, mac_addr, 6);
+  paquete.op = 1; // BOOTREQUEST
+  paquete.htype = 1; // Ethernet
+  paquete.hlen = 6; // Longitud de la dirección MAC
+  paquete.xid = htonl(random()); // ID de transacción
+  paquete.flags = htons(0x8000); // Set broadcast flag
+  memcpy(paquete.chaddr, direccion_mac, 6);
 
-  // Opciones DHCP
-  uint8_t *options = packet.options;
-  *options++ = 53; // Opción: Tipo de mensaje DHCP
-  *options++ = 1;  // Longitud
-  *options++ = 1;  // 1 = DHCPDISCOVER
-  
-  *options++ = 55; // Opción: Lista de parámetros solicitados
-  *options++ = 4;  // Longitud
-  *options++ = 1;  // Máscara de subred
-  *options++ = 3;  // Router
-  *options++ = 6;  // DNS
-  *options++ = 15; // Nombre de dominio
-  
-  *options++ = 255; // Fin de opciones
+  uint8_t *opciones = paquete.opciones;
+  *opciones++ = 53;
+  *opciones++ = 1;
+  *opciones++ = 1;
+  *opciones++ = 55;
+  *opciones++ = 4;
+  *opciones++ = 1;
+  *opciones++ = 3;
+  *opciones++ = 6;
+  *opciones++ = 15;
+  *opciones++ = 255;
 
-  int sock = socket_send_broadcast(&packet);
+  int sock = enviar_broadcast_socket(&paquete);
   printf("DHCPDISCOVER enviado como broadcast\n");
-  // Recibir solicitud
-  int valread = socket_receive_broadcast(sock, &response);
+
+  int valread = recibir_broadcast_socket(sock, &respuesta);
   if (valread > 0) {
-    print_dhcp_response(&response);
-    const char *ip_str = inet_ntoa(*(struct in_addr *)&packet.yiaddr);
-    strcpy(ip_offer, ip_str);
+    imprimir_respuesta_dhcp(&respuesta);
+    const char *ip_str = inet_ntoa(*(struct in_addr *)&paquete.yiaddr);
+    strcpy(ip_ofrecida, ip_str);
   } else {
     printf("Error al recibir DHCPOFFER\n");
   }

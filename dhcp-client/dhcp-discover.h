@@ -1,6 +1,6 @@
-#ifndef DHCP_DISCOVER_H
-#define DHCP_DISCOVER_H
+#ifndef DISCOVER_NET_H
+#define DISCOVER_NET_H
 
-int send_dhcp_discover(char *ip_offer);
+int enviar_descubrimiento_dhcp(char *ip_ofrecida);
 
-#endif // DHCP_DISCOVER_H
+#endif // DISCOVER_NET_H

@@ -2,8 +2,8 @@
 #include "./dhcp-request.h"
 
 int main() {
-  char ip_offer[30];
-  send_dhcp_discover(ip_offer);
-  send_dhcp_request(ip_offer);
+  char ip_ofrecida[30];
+  enviar_descubrimiento_dhcp(ip_ofrecida);
+  enviar_solicitud_dhcp(ip_ofrecida);
   return 0;
 }

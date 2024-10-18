@@ -1,5 +1,5 @@
-#ifndef DHCP_COMMONS_H
-#define DHCP_COMMONS_H
+#ifndef NET_COMMONS_H
+#define NET_COMMONS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,13 +10,13 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 
-#define DHCP_SERVER_PORT 67
-#define DHCP_CLIENT_PORT 68
-#define DHCP_CHADDR_LEN 16
-#define DHCP_SNAME_LEN  64
-#define DHCP_FILE_LEN   128
+#define PUERTO_SERVIDOR_DHCP 67
+#define PUERTO_CLIENTE_DHCP 68
+#define TAMANO_CHADDR 16
+#define TAMANO_SNAME  64
+#define TAMANO_FILE   128
 
-struct dhcp_packet {
+struct paquete_dhcp {
   uint8_t  op;
   uint8_t  htype;
   uint8_t  hlen;
@@ -28,18 +28,18 @@ struct dhcp_packet {
   uint32_t yiaddr;
   uint32_t siaddr;
   uint32_t giaddr;
-  uint8_t  chaddr[DHCP_CHADDR_LEN];
-  char     sname[DHCP_SNAME_LEN];
-  char     file[DHCP_FILE_LEN];
+  uint8_t  chaddr[TAMANO_CHADDR];
+  char     sname[TAMANO_SNAME];
+  char     file[TAMANO_FILE];
   uint32_t magic_cookie;
-  uint8_t options[312];
+  uint8_t opciones[312];
 };
 
-int get_mac_address(const char *interface, uint8_t *mac_addr);
-int socket_send_broadcast(struct dhcp_packet *packet);
-int socket_receive_broadcast(int sock, struct dhcp_packet *response);
-void print_ip(uint32_t ip);
-void parse_options(uint8_t *options, int size);
-void print_dhcp_response(struct dhcp_packet *packet);
+int obtener_mac(const char *interfaz, uint8_t *direccion_mac);
+int enviar_broadcast_socket(struct paquete_dhcp *paquete);
+int recibir_broadcast_socket(int descriptor_socket, struct paquete_dhcp *respuesta);
+void imprimir_ip(uint32_t ip);
+void analizar_opciones(uint8_t *opciones, int tamano);
+void imprimir_respuesta_dhcp(struct paquete_dhcp *paquete);
 
-#endif // DHCP_COMMONS_H
+#endif // NET_COMMONS_H

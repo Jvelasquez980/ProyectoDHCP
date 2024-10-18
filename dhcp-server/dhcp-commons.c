@@ -1,8 +1,8 @@
 #include "./dhcp-commons.h"
 
-void add_option(uint8_t *options, int *offset, uint8_t code, uint8_t len, void *data) {
-    options[(*offset)++] = code;
-    options[(*offset)++] = len;
-    memcpy(options + *offset, data, len);
-    *offset += len;
+void agregar_opcion(uint8_t *opciones, int *desplazamiento, uint8_t codigo, uint8_t longitud, void *dato) {
+    opciones[(*desplazamiento)++] = codigo;
+    opciones[(*desplazamiento)++] = longitud;
+    memcpy(opciones + *desplazamiento, dato, longitud);
+    *desplazamiento += longitud;
 }

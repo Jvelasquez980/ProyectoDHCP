@@ -2,60 +2,60 @@
 #include "./dhcp-discover.h"
 #include "./dhcp-request.h"
 
-#define PORT 67 // Puerto estándar DHCP
+#define PUERTO 67 // Puerto estándar de red
 
 int main() {
-  int server_fd;
-  struct sockaddr_in address;
-  struct dhcp_packet packet;
+  int descriptor_servidor;
+  struct sockaddr_in direccion;
+  struct paquete_red paquete;
 
   // Crear socket
-  if ((server_fd = socket(AF_INET, SOCK_DGRAM, 0)) == 0) {
+  if ((descriptor_servidor = socket(AF_INET, SOCK_DGRAM, 0)) == 0) {
       perror("Fallo en la creación del socket");
       exit(EXIT_FAILURE);
   }
 
-  address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = htons(PORT);
+  direccion.sin_family = AF_INET;
+  direccion.sin_addr.s_addr = INADDR_ANY;
+  direccion.sin_port = htons(PUERTO);
 
   // Vincular el socket
-  if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+  if (bind(descriptor_servidor, (struct sockaddr *)&direccion, sizeof(direccion)) < 0) {
       perror("Fallo en la vinculación");
       exit(EXIT_FAILURE);
   }
 
-  printf("Servidor DHCP escuchando en el puerto %d...\n", PORT);
+  printf("Servidor de red escuchando en el puerto %d...\n", PUERTO);
 
   while(1) {
-    struct sockaddr_in client_address;
-    socklen_t client_address_len = sizeof(client_address);
-    
-    // Recibir solicitud
-    int valread = recvfrom(server_fd, &packet, sizeof(packet), 0, 
-                            (struct sockaddr *)&client_address, &client_address_len);
-    printf("Solicitud DHCP recibida\n");
+    struct sockaddr_in direccion_cliente;
+    socklen_t longitud_direccion_cliente = sizeof(direccion_cliente);
 
-    // Determinar el tipo de mensaje DHCP
-    uint8_t *options = packet.options;
-    uint8_t msg_type = 0;
-    while (*options != 255 && options < packet.options + sizeof(packet.options)) {
-        if (*options == 53 && *(options + 1) == 1) {
-            msg_type = *(options + 2);
+    // Recibir solicitud
+    int valread = recvfrom(descriptor_servidor, &paquete, sizeof(paquete), 0,
+                            (struct sockaddr *)&direccion_cliente, &longitud_direccion_cliente);
+    printf("Solicitud de red recibida\n");
+
+    // Determinar el tipo de mensaje
+    uint8_t *opciones = paquete.opciones;
+    uint8_t tipo_mensaje = 0;
+    while (*opciones != 255 && opciones < paquete.opciones + sizeof(paquete.opciones)) {
+        if (*opciones == 53 && *(opciones + 1) == 1) {
+            tipo_mensaje = *(opciones + 2);
             break;
         }
-        options += *(options + 1) + 2;
+        opciones += *(opciones + 1) + 2;
     }
 
-    switch(msg_type) {
+    switch(tipo_mensaje) {
       case 1: // DHCPDISCOVER
-        process_dhcp_discover(server_fd, &packet, (struct sockaddr *)&client_address);
+        gestionar_descubrimiento(descriptor_servidor, &paquete, (struct sockaddr *)&direccion_cliente);
         break;
       case 3: // DHCPREQUEST
-        process_dhcp_request(server_fd, &packet, (struct sockaddr *)&client_address);
+        gestionar_solicitud(descriptor_servidor, &paquete, (struct sockaddr *)&direccion_cliente);
         break;
       default:
-        printf("Tipo de mensaje DHCP no soportado: %d\n", msg_type);
+        printf("Tipo de mensaje no soportado: %d\n", tipo_mensaje);
     }
   }
 
